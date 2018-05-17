@@ -1,0 +1,11 @@
+{
+  "mocha.files.glob": "src/**/*.spec.ts",
+  "mocha.requires": [
+    "chai",
+    "chai-as-promised",
+    "ts-node/register"
+  ],
+  "mocha.options": {
+    "compilers": "ts:ts-node/register"
+  }
+}
