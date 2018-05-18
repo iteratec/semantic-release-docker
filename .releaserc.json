@@ -1,4 +1,10 @@
 {
   "branch": "master",
-  "noCi": true
+  "noCi": true,
+  "publish": [
+    {
+      "path": "@semantic-release/npm",
+      "pkgRoot": "dist"
+    }
+  ]
 }
