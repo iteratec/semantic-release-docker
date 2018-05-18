@@ -6,20 +6,20 @@ import { PrepareParams } from './prepareParams';
 var prepared = false;
 
 export async function prepare(pluginConfig: DockerPluginConfig, params: PrepareParams): Promise<string[]> {
-  if (!pluginConfig.imageName) {
+  if (!pluginConfig.prepare.imageName) {
     throw new Error('\'imageName\' is not set in plugin configuration');
   }
   const docker = new Dockerode();
-  const image = docker.getImage(pluginConfig.imageName);
+  const image = docker.getImage(pluginConfig.prepare.imageName);
   const tags = [params.nextRelease.version];
-  if (pluginConfig.movingTags && pluginConfig.movingTags.length > 0) {
-    tags.concat(pluginConfig.movingTags);
+  if (pluginConfig.prepare.additionalTags && pluginConfig.prepare.additionalTags.length > 0) {
+    tags.concat(pluginConfig.prepare.additionalTags);
   }
   return Promise.all(tags.map((imagetag) => {
     return image.tag({
-      repo: `${pluginConfig.registryUrl ? `${pluginConfig.registryUrl}/` : ''}` +
-      `${pluginConfig.repositoryName ? `${pluginConfig.repositoryName}/` : ''}` +
-      `${pluginConfig.imageName}`,
+      repo: `${pluginConfig.prepare.registryUrl ? `${pluginConfig.prepare.registryUrl}/` : ''}` +
+      `${pluginConfig.prepare.repositoryName ? `${pluginConfig.prepare.repositoryName}/` : ''}` +
+      `${pluginConfig.prepare.imageName}`,
       tag: imagetag,
     });
   }))

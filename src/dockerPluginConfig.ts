@@ -1,6 +1,8 @@
 export interface DockerPluginConfig {
-  imageName: string;
-  movingTags?: string[];
-  registryUrl?: string;
-  repositoryName?: string;
+  prepare: {
+    additionalTags?: string[];
+    imageName: string;
+    registryUrl?: string;
+    repositoryName?: string;
+  };
 }

@@ -20,7 +20,9 @@ describe('prepare plugin', function() {
 
   it('should throw if no imagename is provided', function() {
     const config: DockerPluginConfig = {
-      imageName: '',
+      prepare: {
+        imageName: '',
+      },
     };
     const params: PrepareParams = {
       // tslint:disable-next-line:no-empty
@@ -32,7 +34,9 @@ describe('prepare plugin', function() {
 
   it('should tag an image', function() {
     const config: DockerPluginConfig = {
-      imageName: 'hello-world',
+      prepare: {
+        imageName: 'hello-world',
+      },
     };
     const params: PrepareParams = {
       // tslint:disable-next-line:no-empty

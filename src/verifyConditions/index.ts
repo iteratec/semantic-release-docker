@@ -12,8 +12,8 @@ export async function verifyConditions(pluginConfig: DockerPluginConfig, logger:
     throw new Error('Environment variable DOCKER_REGISTRY_PASSWORD must be set in order to login to the registry.');
   }
   let registryUrl: string;
-  if (process.env.DOCKER_REGISTRY_URL || pluginConfig.registryUrl) {
-    registryUrl = process.env.DOCKER_REGISTRY_URL ? process.env.DOCKER_REGISTRY_URL : pluginConfig.registryUrl!;
+  if (process.env.DOCKER_REGISTRY_URL || pluginConfig.prepare.registryUrl) {
+    registryUrl = process.env.DOCKER_REGISTRY_URL ? process.env.DOCKER_REGISTRY_URL : pluginConfig.prepare.registryUrl!;
   } else {
     registryUrl = '';
   }
