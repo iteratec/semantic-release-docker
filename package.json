@@ -13,6 +13,10 @@
     "semver"
   ],
   "author": "Christoph Murczek <cmu@iteratec.at>",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:iteratec/semantic-release-docker.git"
+  },
   "license": "MIT",
   "dependencies": {
     "dockerode": "^2.5.5"
