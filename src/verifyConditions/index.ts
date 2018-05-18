@@ -1,10 +1,10 @@
 import { Logger } from '../../typings/semantic-release';
+import { DockerPluginConfig } from '../dockerPluginConfig';
 import { Registry } from '../model/registry';
-import { VerifyConditionsConfig } from './verifyConditionsConfig';
 
 var verified = false;
 
-export async function verifyConditions(pluginConfig: VerifyConditionsConfig, logger: Logger) {
+export async function verifyConditions(pluginConfig: DockerPluginConfig, logger: Logger) {
   if (!process.env.DOCKER_REGISTRY_USER) {
     throw new Error('Environment variable DOCKER_REGISTRY_USER must be set in order to login to the registry.');
   }
@@ -13,7 +13,7 @@ export async function verifyConditions(pluginConfig: VerifyConditionsConfig, log
   }
   let registryUrl: string;
   if (process.env.DOCKER_REGISTRY_URL || pluginConfig.registryUrl) {
-    registryUrl = process.env.DOCKER_REGISTRY_URL ? process.env.DOCKER_REGISTRY_URL : pluginConfig.registryUrl;
+    registryUrl = process.env.DOCKER_REGISTRY_URL ? process.env.DOCKER_REGISTRY_URL : pluginConfig.registryUrl!;
   } else {
     registryUrl = '';
   }

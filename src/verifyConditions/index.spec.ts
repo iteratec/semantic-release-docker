@@ -19,7 +19,7 @@ describe('docker verifyConditions plugin', function() {
   it('should throw when the username is not set', function() {
     // tslint:disable-next-line:no-empty
     const logger: Logger = {log: () => {}};
-    return expect(verifyConditions({registryUrl: ''}, logger)).to.eventually.be
+    return expect(verifyConditions({registryUrl: '', imageName: ''}, logger)).to.eventually.be
       .rejectedWith('Environment variable DOCKER_REGISTRY_USER must be set in order to login to the registry.');
   });
 
@@ -27,7 +27,7 @@ describe('docker verifyConditions plugin', function() {
     // tslint:disable-next-line:no-empty
     const logger: Logger = {log: () => {}};
     process.env.DOCKER_REGISTRY_USER = 'username';
-    return expect(verifyConditions({registryUrl: ''}, logger)).to.eventually.be
+    return expect(verifyConditions({registryUrl: '', imageName: ''}, logger)).to.eventually.be
       .rejectedWith('Environment variable DOCKER_REGISTRY_PASSWORD must be set in order to login to the registry.');
   });
 
@@ -36,8 +36,8 @@ describe('docker verifyConditions plugin', function() {
     const logger: Logger = {log: () => {}};
     process.env.DOCKER_REGISTRY_USER = 'username';
     process.env.DOCKER_REGISTRY_PASSWORD = 'password';
-    return expect(verifyConditions({registryUrl: 'my_private_registry'}, logger)).to.eventually.be
-  .rejectedWith(/(?:my_private_registry)/);
+    return expect(verifyConditions({registryUrl: 'my_private_registry', imageName: ''}, logger)).to.eventually.be
+      .rejectedWith(/(?:my_private_registry)/);
   });
 
   it('should prefer the registry from the environment variable over the one from the config', function() {
@@ -46,17 +46,18 @@ describe('docker verifyConditions plugin', function() {
     process.env.DOCKER_REGISTRY_USER = 'username';
     process.env.DOCKER_REGISTRY_PASSWORD = 'password';
     process.env.DOCKER_REGISTRY_URL = 'my_other_private_registry';
-    return expect(verifyConditions({registryUrl: 'my_private_registry'}, logger)).to.eventually.be
-  .rejectedWith(/(?:my_other_private_registry)/);
+    return expect(verifyConditions({registryUrl: 'my_private_registry', imageName: ''}, logger)).to.eventually.be
+      .rejectedWith(/(?:my_other_private_registry)/);
   });
 
   it('should default to docker hub if no registry is specified', function() {
+    this.timeout(10000);
     // tslint:disable-next-line:no-empty
     const logger: Logger = {log: () => {}};
     process.env.DOCKER_REGISTRY_USER = 'badusername';
     process.env.DOCKER_REGISTRY_PASSWORD = 'pass@w0rd';
-    return expect(verifyConditions({registryUrl: ''}, logger)).to.eventually.be
-  .rejectedWith(/(?:index.docker.com|registry-1.docker.io)/);
+    return expect(verifyConditions({registryUrl: '', imageName: ''}, logger)).to.eventually.be
+      .rejectedWith(/(?:index.docker.com|registry-1.docker.io)/);
   });
 
 });
