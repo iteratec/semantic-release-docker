@@ -20,6 +20,9 @@
     "url": "git@github.com:iteratec/semantic-release-docker.git"
   },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "dockerode": "^2.5.5"
   },
