@@ -1,42 +1,54 @@
 import Dockerode from 'dockerode';
 
+import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
 import { DockerPluginConfig } from '../dockerPluginConfig';
 import { Auth } from '../model/auth';
-import { prepare } from '../prepare';
-import { PrepareParams } from '../prepare/prepareParams';
-
-declare var prepared: boolean;
+import { prepare, prepared } from '../prepare';
 
 interface PushOptions extends Auth {
   tag: string;
 }
 
-export async function publish(pluginConfig: DockerPluginConfig, params: PrepareParams) {
+export interface PublishedRelease {
+  completeImageName: string[];
+}
+
+export async function publish(pluginConfig: SemanticReleaseConfig, context: SemanticReleaseContext) {
   if (!prepared) {
-    prepare(pluginConfig, params);
+    prepare(pluginConfig, context);
   }
   const docker = new Dockerode();
-  const tags = [params.nextRelease.version];
-  if (pluginConfig.prepare.additionalTags && pluginConfig.prepare.additionalTags.length > 0) {
-    tags.concat(pluginConfig.prepare.additionalTags);
+  const tags = [context.nextRelease!.version!];
+  const preparePlugin = context.options.prepare!
+    .find((p) => p.path === '@iteratec/semantic-release-docker')! as DockerPluginConfig;
+  if (preparePlugin.additionalTags && preparePlugin.additionalTags.length > 0) {
+    tags.concat(preparePlugin.additionalTags);
   }
-  const image = docker.getImage(
-    `${pluginConfig.prepare.registryUrl ? `${pluginConfig.prepare.registryUrl}/` : ''}` +
-    `${pluginConfig.prepare.repositoryName ? `${pluginConfig.prepare.repositoryName}/` : ''}` +
-    `${pluginConfig.prepare.imageName}`);
+  const imageName = `${preparePlugin.registryUrl ? `${preparePlugin.registryUrl}/` : ''}` +
+    `${preparePlugin.repositoryName ? `${preparePlugin.repositoryName}/` : ''}` +
+    `${preparePlugin.imageName}`;
+  const image = docker.getImage(imageName);
   const options: PushOptions = {
     password: process.env.DOCKER_REGISTRY_PASSWORD!,
     serveraddress: process.env.DOCKER_REGISTRY_URL ?
-      process.env.DOCKER_REGISTRY_URL : pluginConfig.prepare.registryUrl ? pluginConfig.prepare.registryUrl : '',
+      process.env.DOCKER_REGISTRY_URL : preparePlugin.registryUrl ? preparePlugin.registryUrl : '',
     tag: '',
     username: process.env.DOCKER_REGISTRY_USER!,
   };
   return Promise.all(tags.map((imageTag: string) => {
     options.tag = imageTag;
+    context.logger.log(`pushing image ${imageName}:${imageTag}`);
     return image.push(options);
   }))
-    .then((data) => {
-      return true;
+    .then((streams) => Promise.all(streams.map((stream) => new Promise((resolve, reject) => {
+      stream.on('data', (chunk) => context.logger.log(chunk.toString()));
+      stream.on('end', () => resolve());
+      stream.on('error', (error) => reject(error));
+    }))))
+    .then(() => {
+      return {
+        completeImageName: tags.map((tag: string) => `${imageName}:${tag}`),
+      } as PublishedRelease;
     })
     .catch((error) => {
       throw new Error(error);

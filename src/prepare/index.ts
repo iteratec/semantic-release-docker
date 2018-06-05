@@ -1,25 +1,27 @@
 import Dockerode from 'dockerode';
 
+import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
 import { DockerPluginConfig } from '../dockerPluginConfig';
-import { PrepareParams } from './prepareParams';
 
-var prepared = false;
+export var prepared = false;
 
-export async function prepare(pluginConfig: DockerPluginConfig, params: PrepareParams): Promise<string[]> {
-  if (!pluginConfig.prepare.imageName) {
+export async function prepare(pluginConfig: SemanticReleaseConfig, context: SemanticReleaseContext): Promise<string[]> {
+  const preparePlugin = context.options.prepare!
+    .find((p) => p.path === '@iteratec/semantic-release-docker') as DockerPluginConfig;
+  if (!preparePlugin.imageName) {
     throw new Error('\'imageName\' is not set in plugin configuration');
   }
   const docker = new Dockerode();
-  const image = docker.getImage(pluginConfig.prepare.imageName);
-  const tags = [params.nextRelease.version];
-  if (pluginConfig.prepare.additionalTags && pluginConfig.prepare.additionalTags.length > 0) {
-    tags.concat(pluginConfig.prepare.additionalTags);
+  const image = docker.getImage(preparePlugin.imageName);
+  const tags = [context.nextRelease!.version!];
+  if (preparePlugin.additionalTags && preparePlugin.additionalTags.length > 0) {
+    tags.concat(preparePlugin.additionalTags);
   }
   return Promise.all(tags.map((imagetag) => {
     return image.tag({
-      repo: `${pluginConfig.prepare.registryUrl ? `${pluginConfig.prepare.registryUrl}/` : ''}` +
-      `${pluginConfig.prepare.repositoryName ? `${pluginConfig.prepare.repositoryName}/` : ''}` +
-      `${pluginConfig.prepare.imageName}`,
+      repo: `${preparePlugin.registryUrl ? `${preparePlugin.registryUrl}/` : ''}` +
+      `${preparePlugin.repositoryName ? `${preparePlugin.repositoryName}/` : ''}` +
+      `${preparePlugin.imageName}`,
       tag: imagetag,
     });
   }))
