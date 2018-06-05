@@ -1,6 +1,6 @@
 import Docker from 'dockerode';
 
-import { Auth } from "./auth";
+import { Auth } from './auth';
 
 export class Registry {
   private docker = new Docker();
