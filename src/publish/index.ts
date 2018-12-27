@@ -18,11 +18,11 @@ export async function publish(pluginConfig: SemanticReleaseConfig, context: Sema
     prepare(pluginConfig, context);
   }
   const docker = new Dockerode();
-  const tags = [context.nextRelease!.version!];
+  let tags = [context.nextRelease!.version!];
   const preparePlugin = context.options.prepare!
     .find((p) => p.path === '@iteratec/semantic-release-docker')! as DockerPluginConfig;
   if (preparePlugin.additionalTags && preparePlugin.additionalTags.length > 0) {
-    tags.concat(preparePlugin.additionalTags);
+    tags = tags.concat(preparePlugin.additionalTags);
   }
   const imageName = `${preparePlugin.registryUrl ? `${preparePlugin.registryUrl}/` : ''}` +
     `${preparePlugin.repositoryName ? `${preparePlugin.repositoryName}/` : ''}` +
