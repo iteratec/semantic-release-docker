@@ -55,6 +55,7 @@ describe('@iteratec/semantic-release-docker', function() {
     });
 
     it('should use the registry from the config', function() {
+      this.timeout(5000);
       process.env.DOCKER_REGISTRY_USER = 'username';
       process.env.DOCKER_REGISTRY_PASSWORD = 'password';
       (context.options.prepare![0] as DockerPluginConfig).registryUrl = 'my_private_registry';
@@ -63,6 +64,7 @@ describe('@iteratec/semantic-release-docker', function() {
     });
 
     it('should prefer the registry from the environment variable over the one from the config', function() {
+      this.timeout(5000);
       process.env.DOCKER_REGISTRY_USER = 'username';
       process.env.DOCKER_REGISTRY_PASSWORD = 'password';
       process.env.DOCKER_REGISTRY_URL = 'my_other_private_registry';
