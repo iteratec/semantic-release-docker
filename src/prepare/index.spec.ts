@@ -57,5 +57,11 @@ describe('@iteratec/semantic-release-docker', function() {
       return expect(prepare(config, context)).to.eventually.deep.equal(['hello-world']);
     });
 
+    it('should add multiple tags to an image', function() {
+      (context.options.prepare![0] as DockerPluginConfig).imageName = 'hello-world';
+      (context.options.prepare![0] as DockerPluginConfig).additionalTags = ['tag1', 'tag2'];
+      return expect(prepare(config, context)).to.eventually.have.length(3);
+    });
+
   });
 });
