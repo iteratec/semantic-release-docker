@@ -2,6 +2,10 @@ import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release'
 import { DockerPluginConfig } from '../dockerPluginConfig';
 import { Registry } from '../model/registry';
 
+// Just for Development
+// process.env.DOCKER_REGISTRY_USER = "username";
+// process.env.DOCKER_REGISTRY_PASSWORD = "password";
+
 export var verified = false;
 
 export async function verifyConditions(pluginConfig: SemanticReleaseConfig, context: SemanticReleaseContext) {
@@ -12,12 +16,12 @@ export async function verifyConditions(pluginConfig: SemanticReleaseConfig, cont
     throw new Error('Environment variable DOCKER_REGISTRY_PASSWORD must be set in order to login to the registry.');
   }
   let preparePlugin: DockerPluginConfig;
-  if (!context.options.prepare ||
-      !context.options.prepare!.find((p) => p.path === '@iteratec/semantic-release-docker')) {
+  if (!context.options.prepare || !context.options.prepare!.find((p) => p.path === '@iteratec/semantic-release-docker')) {
     throw new Error('\'prepare\' is not configured');
   }
-  preparePlugin = context.options.prepare
-    .find((p) => p.path === '@iteratec/semantic-release-docker') as DockerPluginConfig;
+  preparePlugin = context.options.prepare.find(
+    (p) => p.path === '@iteratec/semantic-release-docker',
+  ) as DockerPluginConfig;
   let registryUrl: string;
   if (process.env.DOCKER_REGISTRY_URL || preparePlugin.registryUrl) {
     registryUrl = process.env.DOCKER_REGISTRY_URL ? process.env.DOCKER_REGISTRY_URL : preparePlugin.registryUrl!;
@@ -25,10 +29,9 @@ export async function verifyConditions(pluginConfig: SemanticReleaseConfig, cont
     registryUrl = '';
   }
   const registry = new Registry(registryUrl);
-  return registry.login(process.env.DOCKER_REGISTRY_USER, process.env.DOCKER_REGISTRY_PASSWORD)
-    .then((result) => {
-      if (!verified) {
-        verified = true;
-      }
+  return registry.login(process.env.DOCKER_REGISTRY_USER, process.env.DOCKER_REGISTRY_PASSWORD).then((result) => {
+    if (!verified) {
+      verified = true;
+    }
   });
 }

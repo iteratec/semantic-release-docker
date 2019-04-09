@@ -7,7 +7,6 @@ import { DockerPluginConfig } from '../dockerPluginConfig';
 import { prepare } from './index';
 
 describe('@iteratec/semantic-release-docker', function() {
-
   describe('prepare', function() {
     const config: SemanticReleaseConfig = {
       branch: '',
@@ -16,9 +15,8 @@ describe('@iteratec/semantic-release-docker', function() {
       tagFormat: '',
     };
     const context: SemanticReleaseContext = {
-
       // tslint:disable-next-line:no-empty
-      logger: { log: (message: string) => {}},
+      logger: { log: (message: string) => {} },
       nextRelease: {
         gitTag: '',
         notes: '',
@@ -54,14 +52,13 @@ describe('@iteratec/semantic-release-docker', function() {
 
     it('should tag an image', function() {
       (context.options.prepare![0] as DockerPluginConfig).imageName = 'hello-world';
-      return expect(prepare(config, context)).to.eventually.deep.equal(['hello-world']);
+      return expect(prepare(config, context)).to.eventually.deep.equal([['hello-world']]);
     });
 
     it('should add multiple tags to an image', function() {
       (context.options.prepare![0] as DockerPluginConfig).imageName = 'hello-world';
       (context.options.prepare![0] as DockerPluginConfig).additionalTags = ['tag1', 'tag2'];
-      return expect(prepare(config, context)).to.eventually.have.length(3);
+      return expect(prepare(config, context).then((data) => data[0])).to.eventually.have.length(3);
     });
-
   });
 });

@@ -6,7 +6,6 @@ import { DockerPluginConfig } from '../dockerPluginConfig';
 import { verifyConditions } from './index';
 
 describe('@iteratec/semantic-release-docker', function() {
-
   describe('verifyConditions', function() {
     const config: SemanticReleaseConfig = {
       branch: '',
@@ -44,14 +43,16 @@ describe('@iteratec/semantic-release-docker', function() {
     });
 
     it('should throw when the username is not set', function() {
-      return expect(verifyConditions(config, context)).to.eventually.be
-        .rejectedWith('Environment variable DOCKER_REGISTRY_USER must be set in order to login to the registry.');
+      return expect(verifyConditions(config, context)).to.eventually.be.rejectedWith(
+        'Environment variable DOCKER_REGISTRY_USER must be set in order to login to the registry.',
+      );
     });
 
     it('should throw when the password is not set', function() {
       process.env.DOCKER_REGISTRY_USER = 'username';
-      return expect(verifyConditions(config, context)).to.eventually.be
-        .rejectedWith('Environment variable DOCKER_REGISTRY_PASSWORD must be set in order to login to the registry.');
+      return expect(verifyConditions(config, context)).to.eventually.be.rejectedWith(
+        'Environment variable DOCKER_REGISTRY_PASSWORD must be set in order to login to the registry.',
+      );
     });
 
     it('should use the registry from the config', function() {
@@ -59,8 +60,7 @@ describe('@iteratec/semantic-release-docker', function() {
       process.env.DOCKER_REGISTRY_USER = 'username';
       process.env.DOCKER_REGISTRY_PASSWORD = 'password';
       (context.options.prepare![0] as DockerPluginConfig).registryUrl = 'my_private_registry';
-      return expect(verifyConditions(config, context))
-        .to.eventually.be.rejectedWith(/(?:my_private_registry)/);
+      return expect(verifyConditions(config, context)).to.eventually.be.rejectedWith(/(?:my_private_registry)/);
     });
 
     it('should prefer the registry from the environment variable over the one from the config', function() {
@@ -69,8 +69,7 @@ describe('@iteratec/semantic-release-docker', function() {
       process.env.DOCKER_REGISTRY_PASSWORD = 'password';
       process.env.DOCKER_REGISTRY_URL = 'my_other_private_registry';
       (context.options.prepare![0] as DockerPluginConfig).registryUrl = 'my_private_registry';
-      return expect(verifyConditions(config, context))
-        .to.eventually.be.rejectedWith(/(?:my_other_private_registry)/);
+      return expect(verifyConditions(config, context)).to.eventually.be.rejectedWith(/(?:my_other_private_registry)/);
     });
 
     it('should default to docker hub if no registry is specified', function() {
@@ -79,10 +78,9 @@ describe('@iteratec/semantic-release-docker', function() {
       (context.options.prepare![0] as DockerPluginConfig).imageName = '';
       process.env.DOCKER_REGISTRY_USER = 'badusername';
       process.env.DOCKER_REGISTRY_PASSWORD = 'pass@w0rd';
-      return expect(verifyConditions(config, context)).to.eventually.be
-        .rejectedWith(/(?:index.docker.com|registry-1.docker.io)/);
+      return expect(verifyConditions(config, context)).to.eventually.be.rejectedWith(
+        /(?:index.docker.com|registry-1.docker.io)/,
+      );
     });
-
   });
-
 });
