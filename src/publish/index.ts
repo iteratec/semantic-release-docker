@@ -1,11 +1,12 @@
 import Dockerode from 'dockerode';
 
 import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
-import { DockerPluginConfig } from '../dockerPluginConfig';
-import { Auth } from '../model/auth';
+import { Authentication, DockerPluginConfig } from '../models';
+import { pluginSettings } from '../plugin-settings';
 import { prepare, prepared } from '../prepare';
+import { constructImageName, getRegistryUrlFromConfig } from '../shared-logic';
 
-interface PushOptions extends Auth {
+interface PushOptions extends Authentication {
   tag: string;
 }
 
@@ -19,28 +20,22 @@ export async function publish(pluginConfig: SemanticReleaseConfig, context: Sema
   }
   const docker = new Dockerode();
 
-  const preparePlugins = context.options.prepare!.filter(
-    (p) => p.path === '@iteratec/semantic-release-docker',
-  ) as DockerPluginConfig[];
+  const preparePlugins = context.options.prepare!.filter((p) => p.path === pluginSettings.path) as DockerPluginConfig[];
 
   return Promise.all(
     preparePlugins.map((preparePlugin) => {
       let tags = [context.nextRelease!.version!];
+
       if (preparePlugin.additionalTags && preparePlugin.additionalTags.length > 0) {
         tags = tags.concat(preparePlugin.additionalTags);
       }
-      const imageName =
-        `${preparePlugin.registryUrl ? `${preparePlugin.registryUrl}/` : ''}` +
-        `${preparePlugin.repositoryName ? `${preparePlugin.repositoryName}/` : ''}` +
-        `${preparePlugin.imageName}`;
+
+      const imageName = constructImageName(preparePlugin);
+
       const image = docker.getImage(imageName);
       const options: PushOptions = {
         password: process.env.DOCKER_REGISTRY_PASSWORD!,
-        serveraddress: process.env.DOCKER_REGISTRY_URL
-          ? process.env.DOCKER_REGISTRY_URL
-          : preparePlugin.registryUrl
-          ? preparePlugin.registryUrl
-          : '',
+        serveraddress: getRegistryUrlFromConfig(preparePlugin),
         tag: '',
         username: process.env.DOCKER_REGISTRY_USER!,
       };

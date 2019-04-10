@@ -1,6 +1,6 @@
 import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
 import { prepare, publish, verifyConditions } from './src';
-import { DockerPluginConfig } from './src/dockerPluginConfig';
+import { DockerPluginConfig } from './src/models';
 
 const config: SemanticReleaseConfig = {
   branch: '',
