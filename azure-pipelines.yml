@@ -41,7 +41,7 @@ jobs:
           artifactName: "Plugin"
           targetPath: dist
       - task: Npm@1
-        command: "Install dependencies"
+        displayName: "Install dependencies"
         inputs:
           verbose: false
       - task: Npm@1
