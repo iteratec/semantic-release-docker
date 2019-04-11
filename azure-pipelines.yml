@@ -16,7 +16,7 @@ jobs:
         displayName: Build
         inputs:
           command: custom
-          customComand: run build
+          customCommand: run build
       - task: Npm@1
         displayName: Test
         inputs:
