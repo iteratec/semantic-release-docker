@@ -14,7 +14,7 @@ jobs:
           verbose: false
       - task: Npm@1
         displayName: Build
-        ipnuts:
+        inputs:
           command: custom
           customComand: run build
       - task: Npm@1
@@ -34,13 +34,13 @@ jobs:
     steps:
       - task: NodeTool@0
         displayName: "Use Node 10"
-        iputs:
+        inputs:
           versionSpec: 10.x
       - task: DownloadPipelineArtifact@0
         inputs:
           artifactName: "Plugin"
           targetPath: dist
-      - taks: Npm@1
+      - task: Npm@1
         command: "Install dependencies"
         inputs:
           verbose: false
