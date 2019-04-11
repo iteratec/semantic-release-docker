@@ -7,7 +7,8 @@
     "build": "rimraf dist && tsc",
     "postbuild": "cpx package.json dist/ && cpx package-lock.json dist/",
     "commit": "git-cz",
-    "test": "mocha -r chai -r chai-as-promised -r ts-node/register src/**/*.spec.ts"
+    "test": "mocha -r chai -r chai-as-promised -r ts-node/register src/**/*.spec.ts",
+    "release": "semantic-release"
   },
   "keywords": [
     "semantic-release",
