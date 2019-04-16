@@ -113,10 +113,10 @@ describe('@iteratec/semantic-release-docker', function() {
       );
     });
 
-    it('should throw if image with imagename does not exist', function() {
+    it('should throw if image with imagename does not exist', async function() {
       const docker = new Docker();
       try {
-        docker.getImage(imageName).remove();
+        await docker.getImage(imageName).remove();
       } catch (err) {}
 
       const context = {
