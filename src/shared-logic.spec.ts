@@ -13,7 +13,7 @@ describe('@iteratec/semantic-release-docker', function() {
     it('should use only image name', function() {
       const config: DockerPluginConfig = {
         path: '@iteratec/semantic-release-docker',
-        imageName: 'test',
+        imageName: 'test'
       };
       expect(constructImageName(config)).to.be.equal('test');
     });
@@ -22,7 +22,7 @@ describe('@iteratec/semantic-release-docker', function() {
       const config: DockerPluginConfig = {
         path: '@iteratec/semantic-release-docker',
         imageName: 'test',
-        repositoryName: 'repo',
+        repositoryName: 'repo'
       };
       expect(constructImageName(config)).to.be.equal('repo/test');
     });
@@ -32,7 +32,7 @@ describe('@iteratec/semantic-release-docker', function() {
         path: '@iteratec/semantic-release-docker',
         imageName: 'test',
         repositoryName: 'repo',
-        registryUrl: 'registry',
+        registryUrl: 'registry'
       };
       expect(constructImageName(config)).to.be.equal('registry/repo/test');
     });
@@ -41,7 +41,7 @@ describe('@iteratec/semantic-release-docker', function() {
       const config: DockerPluginConfig = {
         path: '@iteratec/semantic-release-docker',
         imageName: 'test',
-        registryUrl: 'registry',
+        registryUrl: 'registry'
       };
       expect(getRegistryUrlFromConfig(config)).to.be.equal('registry');
     });
@@ -51,7 +51,7 @@ describe('@iteratec/semantic-release-docker', function() {
       const config: DockerPluginConfig = {
         path: '@iteratec/semantic-release-docker',
         imageName: 'test',
-        registryUrl: 'registry',
+        registryUrl: 'registry'
       };
       expect(getRegistryUrlFromConfig(config)).to.be.equal('my_other_private_registry');
     });
@@ -59,7 +59,7 @@ describe('@iteratec/semantic-release-docker', function() {
     it('should default to empty string if no registry is specified', function() {
       const config: DockerPluginConfig = {
         path: '@iteratec/semantic-release-docker',
-        imageName: 'test',
+        imageName: 'test'
       };
       expect(getRegistryUrlFromConfig(config)).to.be.equal('');
     });
