@@ -6,6 +6,13 @@ import { pluginSettings } from '../plugin-settings';
 import { getCredentials, getRegistryUrlFromConfig } from '../shared-logic';
 
 export var verified = false;
+/**
+ * Just for test purposes.
+ * @param val
+ */
+export function setVerified() {
+  verified = true;
+}
 
 /**
  * First Step
@@ -13,7 +20,7 @@ export var verified = false;
  */
 export async function verifyConditions(
   pluginConfig: SemanticReleaseConfig,
-  context: SemanticReleaseContext,
+  context: SemanticReleaseContext
 ): Promise<any> {
   let cred: Credentials;
 
@@ -25,35 +32,42 @@ export async function verifyConditions(
   }
 
   // Check if plugin is configured in prepare step
-  if (!context.options.prepare || !context.options.prepare!.find((p) => p.path === pluginSettings.path)) {
-    throw new Error('\'prepare\' is not configured');
+  if (!context.options.prepare || !context.options.prepare!.find(p => p.path === pluginSettings.path)) {
+    throw new Error("'prepare' is not configured");
   }
 
-  const preparePlugins = context.options.prepare!.filter((p) => p.path === pluginSettings.path) as DockerPluginConfig[];
+  const preparePlugins = context.options.prepare!.filter(p => p.path === pluginSettings.path) as DockerPluginConfig[];
 
   for (let i = 0; i < preparePlugins.length; i++) {
     const preparePlugin = preparePlugins[i];
 
     // Check if imagename is set
     if (preparePlugin.imageName == null || preparePlugin.imageName.length === 0) {
-      throw new Error('\'imageName\' is not set in plugin configuration');
+      throw new Error("'imageName' is not set in plugin configuration");
+    }
+
+    const docker = new Docker();
+
+    // Check if image exists on machine
+    const imagelist = await docker.listImages({ filters: { reference: [preparePlugin.imageName] } });
+    if (imagelist.length === 0) {
+      throw new Error(`Image with name '${preparePlugin.imageName}' does not exist on this machine.`);
     }
 
     // Check Authentication
-    const docker = new Docker();
     const auth: Authentication = {
       ...cred,
-      serveraddress: getRegistryUrlFromConfig(preparePlugin),
+      serveraddress: getRegistryUrlFromConfig(preparePlugin)
     };
 
     return docker
       .checkAuth(auth)
-      .then((data) => {
+      .then(data => {
         if (!verified) {
           verified = true;
         }
       })
-      .catch((error) => {
+      .catch(error => {
         throw new Error(error);
       });
   }
