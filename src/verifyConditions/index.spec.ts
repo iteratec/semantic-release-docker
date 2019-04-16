@@ -5,6 +5,7 @@ import Docker from 'dockerode';
 import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
 import { DockerPluginConfig } from '../models';
 import { verifyConditions } from './index';
+import { buildImage } from '../test/test-helpers';
 
 describe('@iteratec/semantic-release-docker', function() {
   describe('verifyConditions', function() {
@@ -69,16 +70,7 @@ describe('@iteratec/semantic-release-docker', function() {
 
     it('should default to docker hub if no registry is specified', async function() {
       this.timeout(10000);
-      const docker = new Docker();
-      await docker.buildImage(
-        {
-          context: './',
-          src: ['Dockerfile']
-        },
-        {
-          t: imageName
-        }
-      );
+      await buildImage(imageName);
       (context.options.prepare![0] as DockerPluginConfig).registryUrl = '';
       process.env.DOCKER_REGISTRY_USER = 'badusername';
       process.env.DOCKER_REGISTRY_PASSWORD = 'pass@w0rd';
@@ -115,9 +107,7 @@ describe('@iteratec/semantic-release-docker', function() {
 
     it('should throw if image with imagename does not exist', async function() {
       const docker = new Docker();
-      try {
-        await docker.getImage(imageName).remove();
-      } catch (err) {}
+      await docker.getImage(imageName).remove();
 
       const context = {
         // tslint:disable-next-line:no-empty
@@ -140,51 +130,43 @@ describe('@iteratec/semantic-release-docker', function() {
           tagFormat: ''
         }
       } as SemanticReleaseContext;
-      return expect(verifyConditions(config, context)).to.be.rejectedWith(
+      return expect(verifyConditions(config, context)).to.eventually.be.rejectedWith(
         `Image with name '${imageName}' does not exist on this machine.`
       );
     });
 
-    it('should NOT throw if image with imagename does exist', function() {
+    it('should NOT throw if image with imagename does exist', async function() {
+      await buildImage(imageName);
+      const context = {
+        // tslint:disable-next-line:no-empty
+        logger: { log: (message: string) => {} },
+        nextRelease: {
+          gitTag: '',
+          notes: '',
+          version: 'next'
+        },
+        options: {
+          branch: '',
+          noCi: true,
+          prepare: [
+            {
+              imageName,
+              path: '@iteratec/semantic-release-docker'
+            } as DockerPluginConfig
+          ],
+          repositoryUrl: '',
+          tagFormat: ''
+        }
+      } as SemanticReleaseContext;
+
+      return expect(verifyConditions(config, context)).to.eventually.not.be.rejectedWith(
+        `Image with name '${imageName}' does not exist on this machine.`
+      );
+    });
+
+    after(async function() {
       const docker = new Docker();
-
-      return docker
-        .buildImage(
-          {
-            context: './',
-            src: ['Dockerfile']
-          },
-          {
-            t: imageName
-          }
-        )
-        .then(success => {
-          const context = {
-            // tslint:disable-next-line:no-empty
-            logger: { log: (message: string) => {} },
-            nextRelease: {
-              gitTag: '',
-              notes: '',
-              version: 'next'
-            },
-            options: {
-              branch: '',
-              noCi: true,
-              prepare: [
-                {
-                  imageName,
-                  path: '@iteratec/semantic-release-docker'
-                } as DockerPluginConfig
-              ],
-              repositoryUrl: '',
-              tagFormat: ''
-            }
-          } as SemanticReleaseContext;
-
-          return expect(verifyConditions(config, context)).to.not.be.rejectedWith(
-            `Image with name '${imageName}' does not exist on this machine.`
-          );
-        });
+      await docker.getImage(imageName).remove();
     });
   });
 });

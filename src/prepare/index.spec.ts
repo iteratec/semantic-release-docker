@@ -6,6 +6,7 @@ import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release'
 import { DockerPluginConfig } from '../models';
 import { prepare } from './index';
 import { setVerified } from '../verifyConditions';
+import { buildImage } from '../test/test-helpers';
 
 describe('@iteratec/semantic-release-docker', function() {
   describe('prepare', function() {
@@ -19,47 +20,18 @@ describe('@iteratec/semantic-release-docker', function() {
     const testImage1 = 'test1:latest';
     const testImage2 = 'test2:latest';
 
-    before(function() {
+    before(async function() {
       use(chaiAsPromised);
       setVerified();
-    });
 
-    before(async function() {
-      this.timeout(10000);
-      const docker = new Dockerode();
-      await docker.buildImage(
-        {
-          context: './',
-          src: ['Dockerfile']
-        },
-        {
-          t: testImage1
-        },
-        function(error, output) {
-          if (error) {
-            return console.error(error);
-          }
-        }
-      );
-      await docker.buildImage(
-        {
-          context: './',
-          src: ['Dockerfile']
-        },
-        {
-          t: testImage2
-        },
-        function(error, output) {
-          if (error) {
-            return console.error(error);
-          }
-        }
-      );
+      await buildImage(testImage1);
+      await buildImage(testImage2);
+
       process.env.DOCKER_REGISTRY_USER = 'username';
       process.env.DOCKER_REGISTRY_PASSWORD = 'password';
     });
 
-    it('should tag an image', function() {
+    it('should tag an image', async function() {
       const context = {
         // tslint:disable-next-line:no-empty
         logger: { log: (message: string) => {} },
@@ -81,10 +53,16 @@ describe('@iteratec/semantic-release-docker', function() {
           tagFormat: ''
         }
       } as SemanticReleaseContext;
-      return expect(prepare(config, context)).to.eventually.deep.equal([[testImage1]]);
+      const docker = new Dockerode();
+      let prepareResult = await prepare(config, context);
+
+      expect(prepareResult).to.deep.equal([[testImage1]]);
+
+      let imagelist = await docker.listImages({ filters: { reference: [testImage1] } });
+      expect(imagelist.length).to.equal(1);
     });
 
-    it('should add multiple tags to an image', function() {
+    it('should add multiple tags to an image', async function() {
       const context = {
         // tslint:disable-next-line:no-empty
         logger: { log: (message: string) => {} },
@@ -110,7 +88,7 @@ describe('@iteratec/semantic-release-docker', function() {
       return expect(prepare(config, context).then(data => data[0])).to.eventually.have.length(3);
     });
 
-    it('should add multiple images', function() {
+    it('should add multiple images', async function() {
       const context = {
         // tslint:disable-next-line:no-empty
         logger: { log: (message: string) => {} },
@@ -141,8 +119,33 @@ describe('@iteratec/semantic-release-docker', function() {
 
     after(async function() {
       const docker = new Dockerode();
-      docker.getImage(testImage1).remove();
-      docker.getImage(testImage2).remove();
+      await docker.getImage(testImage1).remove();
+      await docker.getImage(testImage2).remove();
     });
   });
 });
+
+// describe('test', function() {
+//   before(async function() {
+//     console.log('before');
+//   });
+
+//   it('should be true', async function() {
+//     await expect(delayed(100)).to.eventually.be.equal(1);
+
+//     return expect(delayed(100)).to.eventually.be.equal(1);
+//   });
+
+//   after(async function() {
+//     console.log('after');
+//   });
+// });
+
+// function delayed(delay: number) {
+//   return new Promise<number>(resolve => {
+//     setTimeout(() => {
+//       resolve(1);
+//       console.log('delayed');
+//     }, delay);
+//   });
+// }
