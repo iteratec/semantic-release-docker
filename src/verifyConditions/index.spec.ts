@@ -159,7 +159,7 @@ describe('@iteratec/semantic-release-docker', function() {
         }
       } as SemanticReleaseContext;
 
-      return expect(verifyConditions(config, context)).to.eventually.not.be.rejectedWith(
+      return expect(verifyConditions(config, context)).to.not.eventually.be.rejectedWith(
         `Image with name '${imageName}' does not exist on this machine.`
       );
     });
