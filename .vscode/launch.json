@@ -16,7 +16,7 @@
       "sourceMaps": true
     },
     {
-      "name": "Current TS File",
+      "name": "Debug",
       "type": "node",
       "request": "launch",
       "args": ["${workspaceRoot}/develop.ts"],
