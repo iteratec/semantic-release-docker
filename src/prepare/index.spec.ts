@@ -67,6 +67,71 @@ describe('@iteratec/semantic-release-docker', function() {
       expect(imagelist2.length).to.equal(1);
     });
 
+    it('should tag image with next version and repositoryName', async function() {
+      const context = {
+        // tslint:disable-next-line:no-empty
+        logger: { log: (message: string) => {} },
+        nextRelease: {
+          gitTag: '',
+          notes: '',
+          version: 'next'
+        },
+        options: {
+          branch: '',
+          noCi: true,
+          prepare: [
+            {
+              imageName: testImage1,
+              repositoryName: 'repository',
+              path: '@iteratec/semantic-release-docker'
+            } as DockerPluginConfig
+          ],
+          repositoryUrl: '',
+          tagFormat: ''
+        }
+      } as SemanticReleaseContext;
+      let prepareResult = await prepare(config, context);
+
+      expect(prepareResult).to.deep.equal([[testImage1]]);
+
+      let imagelist2 = await docker.listImages({ filters: { reference: [`repository/${testImage1}:next`] } });
+      expect(imagelist2.length).to.equal(1);
+    });
+
+    it('should tag image with next version and repositoryName and url', async function() {
+      const context = {
+        // tslint:disable-next-line:no-empty
+        logger: { log: (message: string) => {} },
+        nextRelease: {
+          gitTag: '',
+          notes: '',
+          version: 'next'
+        },
+        options: {
+          branch: '',
+          noCi: true,
+          prepare: [
+            {
+              imageName: testImage1,
+              repositoryName: 'repository',
+              registryUrl: 'repositoryurl',
+              path: '@iteratec/semantic-release-docker'
+            } as DockerPluginConfig
+          ],
+          repositoryUrl: '',
+          tagFormat: ''
+        }
+      } as SemanticReleaseContext;
+      let prepareResult = await prepare(config, context);
+
+      expect(prepareResult).to.deep.equal([[testImage1]]);
+
+      let imagelist2 = await docker.listImages({
+        filters: { reference: [`repositoryurl/repository/${testImage1}:next`] }
+      });
+      expect(imagelist2.length).to.equal(1);
+    });
+
     it('should tag image without next tag', async function() {
       const context = {
         // tslint:disable-next-line:no-empty
