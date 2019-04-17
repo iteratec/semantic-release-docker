@@ -16,8 +16,14 @@ export interface PublishedRelease {
 
 export async function publish(pluginConfig: SemanticReleaseConfig, context: SemanticReleaseContext) {
   if (!prepared) {
-    prepare(pluginConfig, context);
+    await prepare(pluginConfig, context).then(
+      () => {},
+      reject => {
+        return Promise.reject(reject);
+      }
+    );
   }
+
   const docker = new Dockerode();
 
   const preparePlugins = context.options.prepare!.filter(p => p.path === pluginSettings.path) as DockerPluginConfig[];
