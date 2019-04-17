@@ -71,5 +71,9 @@ export async function publish(pluginConfig: SemanticReleaseConfig, context: Sema
           throw new Error(error);
         });
     })
-  );
+  ).then(publishedImages => {
+    return {
+      publishedImages: publishedImages
+    };
+  });
 }
