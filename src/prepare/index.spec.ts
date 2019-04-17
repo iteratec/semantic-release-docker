@@ -7,6 +7,7 @@ import { DockerPluginConfig } from '../models';
 import { prepare } from './index';
 import { setVerified } from '../verifyConditions';
 import { buildImage } from '../test/test-helpers';
+import { afterEach } from 'mocha';
 
 describe('@iteratec/semantic-release-docker', function() {
   describe('prepare', function() {
@@ -17,21 +18,25 @@ describe('@iteratec/semantic-release-docker', function() {
       tagFormat: ''
     };
 
-    const testImage1 = 'test1:latest';
-    const testImage2 = 'test2:latest';
+    const testImage1 = 'test1';
+    const testImage2 = 'test2';
+
+    const docker = new Dockerode();
 
     before(async function() {
       use(chaiAsPromised);
       setVerified();
 
-      await buildImage(testImage1);
-      await buildImage(testImage2);
-
       process.env.DOCKER_REGISTRY_USER = 'username';
       process.env.DOCKER_REGISTRY_PASSWORD = 'password';
     });
 
-    it('should tag an image', async function() {
+    beforeEach(async function() {
+      await buildImage(testImage1);
+      await buildImage(testImage2);
+    });
+
+    it('should tag image with next version', async function() {
       const context = {
         // tslint:disable-next-line:no-empty
         logger: { log: (message: string) => {} },
@@ -53,16 +58,46 @@ describe('@iteratec/semantic-release-docker', function() {
           tagFormat: ''
         }
       } as SemanticReleaseContext;
-      const docker = new Dockerode();
       let prepareResult = await prepare(config, context);
 
       expect(prepareResult).to.deep.equal([[testImage1]]);
 
-      let imagelist = await docker.listImages({ filters: { reference: [testImage1] } });
-      expect(imagelist.length).to.equal(1);
+      let imagelist2 = await docker.listImages({ filters: { reference: [`${testImage1}:next`] } });
+      expect(imagelist2.length).to.equal(1);
     });
 
-    it('should add multiple tags to an image', async function() {
+    it('should tag image without next tag', async function() {
+      const context = {
+        // tslint:disable-next-line:no-empty
+        logger: { log: (message: string) => {} },
+        nextRelease: {
+          gitTag: '',
+          notes: '',
+          version: 'next'
+        },
+        options: {
+          branch: '',
+          noCi: true,
+          prepare: [
+            {
+              pushVersionTag: false,
+              imageName: testImage1,
+              path: '@iteratec/semantic-release-docker'
+            } as DockerPluginConfig
+          ],
+          repositoryUrl: '',
+          tagFormat: ''
+        }
+      } as SemanticReleaseContext;
+      let prepareResult = await prepare(config, context);
+
+      expect(prepareResult).to.deep.equal([[]]);
+
+      let imagelist2 = await docker.listImages({ filters: { reference: [`${testImage1}:next`] } });
+      expect(imagelist2.length).to.equal(0);
+    });
+
+    it('should add multiple tags to an image (with next version)', async function() {
       const context = {
         // tslint:disable-next-line:no-empty
         logger: { log: (message: string) => {} },
@@ -85,7 +120,55 @@ describe('@iteratec/semantic-release-docker', function() {
           tagFormat: ''
         }
       } as SemanticReleaseContext;
-      return expect(prepare(config, context).then(data => data[0])).to.eventually.have.length(3);
+
+      let prepareResult = await prepare(config, context).then(data => data[0]);
+
+      expect(prepareResult).to.have.length(3);
+
+      let imagelist = await docker.listImages({ filters: { reference: [`${testImage1}:next`] } });
+      expect(imagelist.length).to.equal(1);
+
+      let imagelist1 = await docker.listImages({ filters: { reference: [`${testImage1}:tag1`] } });
+      expect(imagelist1.length).to.equal(1);
+
+      let imagelist2 = await docker.listImages({ filters: { reference: [`${testImage1}:tag2`] } });
+      expect(imagelist2.length).to.equal(1);
+    });
+
+    it('should add multiple tags to an image (without next version)', async function() {
+      const context = {
+        // tslint:disable-next-line:no-empty
+        logger: { log: (message: string) => {} },
+        nextRelease: {
+          gitTag: '',
+          notes: '',
+          version: 'next'
+        },
+        options: {
+          branch: '',
+          noCi: true,
+          prepare: [
+            {
+              pushVersionTag: false,
+              imageName: testImage1,
+              path: '@iteratec/semantic-release-docker',
+              additionalTags: ['tag1', 'tag2']
+            } as DockerPluginConfig
+          ],
+          repositoryUrl: '',
+          tagFormat: ''
+        }
+      } as SemanticReleaseContext;
+
+      let prepareResult = await prepare(config, context).then(data => data[0]);
+
+      expect(prepareResult).to.have.length(2);
+
+      let imagelist1 = await docker.listImages({ filters: { reference: [`${testImage1}:tag1`] } });
+      expect(imagelist1.length).to.equal(1);
+
+      let imagelist2 = await docker.listImages({ filters: { reference: [`${testImage1}:tag2`] } });
+      expect(imagelist2.length).to.equal(1);
     });
 
     it('should add multiple images', async function() {
@@ -106,7 +189,7 @@ describe('@iteratec/semantic-release-docker', function() {
               path: '@iteratec/semantic-release-docker'
             } as DockerPluginConfig,
             {
-              imageName: 'test2',
+              imageName: testImage2,
               path: '@iteratec/semantic-release-docker'
             } as DockerPluginConfig
           ],
@@ -114,38 +197,34 @@ describe('@iteratec/semantic-release-docker', function() {
           tagFormat: ''
         }
       } as SemanticReleaseContext;
-      return expect(prepare(config, context)).to.eventually.have.length(2);
+      let prepareResult = await prepare(config, context);
+
+      expect(prepareResult).to.have.length(2);
+
+      let imagelist1 = await docker.listImages({ filters: { reference: [`${testImage1}:next`] } });
+      expect(imagelist1.length).to.equal(1);
+
+      let imagelist2 = await docker.listImages({ filters: { reference: [`${testImage2}:next`] } });
+      expect(imagelist2.length).to.equal(1);
     });
 
-    after(async function() {
-      const docker = new Dockerode();
-      await docker.getImage(testImage1).remove();
-      await docker.getImage(testImage2).remove();
+    afterEach(async function() {
+      const imagelist1 = await docker.listImages({ filters: { reference: [testImage1] } });
+      await Promise.all(
+        imagelist1.map(image => {
+          return docker.getImage(image.Id).remove({
+            force: true
+          });
+        })
+      );
+      const imagelist2 = await docker.listImages({ filters: { reference: [testImage2] } });
+      await Promise.all(
+        imagelist2.map(image => {
+          return docker.getImage(image.Id).remove({
+            force: true
+          });
+        })
+      );
     });
   });
 });
-
-// describe('test', function() {
-//   before(async function() {
-//     console.log('before');
-//   });
-
-//   it('should be true', async function() {
-//     await expect(delayed(100)).to.eventually.be.equal(1);
-
-//     return expect(delayed(100)).to.eventually.be.equal(1);
-//   });
-
-//   after(async function() {
-//     console.log('after');
-//   });
-// });
-
-// function delayed(delay: number) {
-//   return new Promise<number>(resolve => {
-//     setTimeout(() => {
-//       resolve(1);
-//       console.log('delayed');
-//     }, delay);
-//   });
-// }

@@ -1,4 +1,5 @@
 import { Credentials, DockerPluginConfig } from './models';
+import { SemanticReleaseContext } from 'semantic-release';
 
 export function constructImageName(config: DockerPluginConfig): string {
   return (
@@ -14,6 +15,17 @@ export function getRegistryUrlFromConfig(config: DockerPluginConfig): string {
     : config.registryUrl
     ? config.registryUrl
     : '';
+}
+
+export function getImageTagsFromConfig(config: DockerPluginConfig, context: SemanticReleaseContext): string[] {
+  let tags = [];
+  if (config.pushVersionTag == null || config.pushVersionTag === true) {
+    tags.push(context.nextRelease!.version!);
+  }
+  if (config.additionalTags && config.additionalTags.length > 0) {
+    tags = tags.concat(config.additionalTags);
+  }
+  return tags;
 }
 
 /**
