@@ -6,26 +6,13 @@
 
 A [semantic-release](https://github.com/semantic-release/semantic-release) plugin to use semantic versioning for docker images.
 
-## verifyConditions
-
-verifies that environment variables for authentication via username and password are set.
-It uses a registry server provided via config or environment variable (preferred) or defaults to docker hub if none is given.
-It also verifies that the credentials are correct by logging in to the given registry.
-
-## prepare
-
-tags the specified image with the version number determined by semantic-release and additional tags provided in the configuration.
-In addition it supports specifying a complete image name (CIN) via configuration settings according to the canonical format specified by docker:
-
-`[registryhostname[:port]/][username/]imagename[:tag]`
-
-## publish
-
-pushes the tagged images to the registry.
-
 ## Configuration
 
-### docker registry authentication
+### Installation
+
+`npm i --save @iteratec/semantic-release-docker`
+
+### Docker registry authentication
 
 The `docker registry` authentication is **required** and can be set via environment variables.
 
@@ -37,38 +24,32 @@ The `docker registry` authentication is **required** and can be set via environm
 | DOCKER_REGISTRY_USER     | The user name to authenticate with at the registry.                                       |
 | DOCKER_REGISTRY_PASSWORD | The password used for authentication at the registry.                                     |
 
-### Options
-
-| Option         | Description                                                                                                                                 |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| additionalTags | _Optional_. An array of strings allowing to specify additional tags to apply to the image.                                                  |
-| imageName      | **_Required_** The name of the image to release.                                                                                            |
-| registryUrl    | _Optional_. The hostname and port used by the the registry in format `hostname[:port]`. Omit the port if the registry uses the default port |
-| repositoryName | _Optional_. The name of the repository in the registry, e.g. username on docker hub                                                         |
-
 ### Usage
 
-full configuration:
+#### Full configuration
 
 ```json
 {
   "verifyConfig": ["@iteratec/semantic-release-docker"],
-  "prepare": {
-    "path": "@iteratec/semantic-release-docker",
-    "additionalTags": ["test", "demo"],
-    "imageName": "my-image",
-    "registryUrl": "my-private-registry:5678",
-    "respositoryName": "my-repository"
-  },
+  "prepare": [
+    {
+      "path": "@iteratec/semantic-release-docker",
+      "additionalTags": ["test", "demo"],
+      "imageName": "my-image",
+      "registryUrl": "my-private-registry:5678",
+      "respositoryName": "my-repository",
+      "pushVersionTag": true
+    }
+  ],
   "publish": {
     "path": "@iteratec/semantic-release-docker"
   }
 }
 ```
 
-results in `my-private-registry:5678/my-repository/my-image` with tags `test`, `demo` and the `<semver>` determined by `semantic-release`.
+Results in `my-private-registry:5678/my-repository/my-image` with tags `test`, `demo` and the `<semver>` determined by `semantic-release`.
 
-minimum configuration:
+#### Minimum configuration
 
 ```json
 {
@@ -83,7 +64,37 @@ minimum configuration:
 }
 ```
 
-results in `my-image:<semver>`
+Results in `my-image:<semver>`.
+
+### Options
+
+| Option         | Description                                                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| additionalTags | _Optional_. An array of strings allowing to specify additional tags to apply to the image.                                                  |
+| imageName      | **_Required_** The name of the image to release.                                                                                            |
+| registryUrl    | _Optional_. The hostname and port used by the the registry in format `hostname[:port]`. Omit the port if the registry uses the default port |
+| repositoryName | _Optional_. The name of the repository in the registry, e.g. username on docker hub                                                         |
+| pushVersionTag | _Optional_. Whether the semantic release tag, determined by the version, should be pushed. Default is `true`.                               |
+
+## Steps
+
+### verifyConditions
+
+It uses a registry server provided via config or environment variable (preferred) or defaults to docker hub if none is given.
+
+1. Verifies that environment variables for authentication via username and password are set.
+2. It also verifies that the credentials are correct by logging in to the given registry.
+
+### prepare
+
+Tags the specified image with the version number determined by semantic-release and additional tags provided in the configuration.
+In addition it supports specifying a complete image name (CIN) via configuration settings according to the canonical format specified by docker:
+
+`[registryhostname[:port]/][username/]imagename[:tag]`
+
+### publish
+
+Pushes the tagged images to the registry.
 
 ## Contribute
 
