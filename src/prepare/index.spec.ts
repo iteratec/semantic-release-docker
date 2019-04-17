@@ -32,6 +32,7 @@ describe('@iteratec/semantic-release-docker', function() {
     });
 
     beforeEach(async function() {
+      this.timeout(10000);
       await buildImage(testImage1);
       await buildImage(testImage2);
     });
@@ -209,6 +210,7 @@ describe('@iteratec/semantic-release-docker', function() {
     });
 
     afterEach(async function() {
+      this.timeout(5000);
       const imagelist1 = await docker.listImages({ filters: { reference: [testImage1] } });
       await Promise.all(
         imagelist1.map(image => {
