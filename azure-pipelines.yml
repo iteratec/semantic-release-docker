@@ -22,28 +22,6 @@ jobs:
         inputs:
           command: custom
           customCommand: run test
-      - task: PublishPipelineArtifact@0
-        inputs:
-          artifactName: "Plugin"
-          targetPath: dist
-  - job: Release
-    dependsOn: Build
-    pool:
-      name: Hosted Ubuntu 1604
-      demands: npm
-    steps:
-      - task: NodeTool@0
-        displayName: "Use Node 10"
-        inputs:
-          versionSpec: 10.x
-      - task: DownloadPipelineArtifact@0
-        inputs:
-          artifactName: "Plugin"
-          targetPath: dist
-      - task: Npm@1
-        displayName: "Install dependencies"
-        inputs:
-          verbose: false
       - task: Npm@1
         displayName: Publish
         inputs:
