@@ -1,5 +1,5 @@
 {
   "branch": "master",
-  "noCi": true,
-  "pkgRoot": "dist"
+  "pkgRoot": "dist",
+  "repositoryUrl": "git@github.com:iteratec/semantic-release-docker.git"
 }
