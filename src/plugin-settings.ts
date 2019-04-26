@@ -6,6 +6,7 @@ export const pluginSettings: PluginSettings = {
     additionalTags: [],
     imageName: "",
     path: "@iteratec/semantic-release-docker",
+    pushVersionTag: true,
     registryUrl: "",
     repositoryName: ""
   }

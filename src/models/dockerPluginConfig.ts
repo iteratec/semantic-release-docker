@@ -4,4 +4,5 @@ export interface DockerPluginConfig extends SemanticReleasePlugin {
   imageName: string;
   registryUrl?: string;
   repositoryName?: string;
+  pushVersionTag?: boolean;
 }

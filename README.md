@@ -38,7 +38,8 @@ The `docker registry` authentication is **required** and can be set via environm
       "additionalTags": ["test", "demo"],
       "imageName": "my-image",
       "registryUrl": "my-private-registry:5678",
-      "respositoryName": "my-repository"
+      "respositoryName": "my-repository",
+      "pushVersionTag": true
     }
   ],
   "publish": {
@@ -74,6 +75,7 @@ Results in `my-image:<semver>`.
 | imageName      | **_Required_** The name of the image to release.                                                                                            |
 | registryUrl    | _Optional_. The hostname and port used by the the registry in format `hostname[:port]`. Omit the port if the registry uses the default port |
 | repositoryName | _Optional_. The name of the repository in the registry, e.g. username on docker hub                                                         |
+| pushVersionTag | _Optional_. Whether the semantic release tag, determined by the version, should be pushed. Default is `true`.                               |
 
 ## Steps
 

@@ -19,7 +19,9 @@ export function getRegistryUrlFromConfig(config: DockerPluginConfig): string {
 
 export function getImageTagsFromConfig(config: DockerPluginConfig, context: SemanticReleaseContext): string[] {
   let tags = [];
-  tags.push(context.nextRelease!.version!);
+  if (config.pushVersionTag == null || config.pushVersionTag === true) {
+    tags.push(context.nextRelease!.version!);
+  }
   if (config.additionalTags && config.additionalTags.length > 0) {
     tags = tags.concat(config.additionalTags);
   }
