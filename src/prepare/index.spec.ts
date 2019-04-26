@@ -32,7 +32,7 @@ describe('@iteratec/semantic-release-docker', function() {
     });
 
     beforeEach(async function() {
-      this.timeout(10000);
+      this.timeout(20000);
       await buildImage(testImage1);
       await buildImage(testImage2);
     });
