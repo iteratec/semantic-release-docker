@@ -1,0 +1,30 @@
+jobs:
+  - job: Build
+    pool:
+      name: Hosted Ubuntu 1604
+      demands: npm
+    steps:
+      - task: NodeTool@0
+        displayName: "Use Node 10"
+        inputs:
+          versionSpec: 10.x
+      - task: Npm@1
+        displayName: "Install dependencies"
+        inputs:
+          verbose: false
+      - task: Npm@1
+        displayName: Build
+        inputs:
+          command: custom
+          customCommand: run build
+      - task: Npm@1
+        displayName: Test
+        inputs:
+          command: custom
+          customCommand: run test
+      - script: |
+          npm run release
+        displayName: Publish
+        env:
+          NPM_TOKEN: $(NPMTOKEN)
+          GITHUB_TOKEN: $(GITHUBTOKEN)
