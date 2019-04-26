@@ -22,3 +22,9 @@ jobs:
         inputs:
           command: custom
           customCommand: run test
+      - script: |
+          npm run release
+        displayName: Publish
+        env:
+          NPM_TOKEN: $(NPMTOKEN)
+          GITHUB_TOKEN: $(GITHUBTOKEN)
