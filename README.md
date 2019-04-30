@@ -1,6 +1,6 @@
 # @iteratec/semantic-release-docker
 
-[![Build Status](https://dev.azure.com/iteratec/semantic-release-docker/_apis/build/status/iteratec.semantic-release-docker?branchName=master)](https://dev.azure.com/iteratec/semantic-release-docker/_build/latest?definitionId=2&branchName=master)
+[![Build Status](https://dev.azure.com/iteratec-oss-bdd/semantic-release-docker/_apis/build/status/iteratec.semantic-release-docker?branchName=master)](https://dev.azure.com/iteratec-oss-bdd/semantic-release-docker/_build/latest?definitionId=2&branchName=master)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 [![latest npm package version](https://img.shields.io/npm/v/@iteratec/semantic-release-docker/latest.svg)](https://www.npmjs.com/package/@iteratec/semantic-release-docker)
 [![MIT license](https://img.shields.io/npm/l/@iteratec/semantic-release-docker.svg)](https://www.npmjs.com/package/@iteratec/semantic-release-docker)
@@ -33,24 +33,25 @@ The `docker registry` authentication is **required** and can be set via environm
 ### Environment variables
 
 | Variable                 | Description                                                                               |
-|--------------------------|-------------------------------------------------------------------------------------------|
+| ------------------------ | ----------------------------------------------------------------------------------------- |
 | DOCKER_REGISTRY_URL      | The hostname and port used by the desired docker registry. Leave blank to use docker hub. |
 | DOCKER_REGISTRY_USER     | The user name to authenticate with at the registry.                                       |
 | DOCKER_REGISTRY_PASSWORD | The password used for authentication at the registry.                                     |
 
 ### Options
 
-| Option         | Description                                                                                |
-|----------------|--------------------------------------------------------------------------------------------|
-| additionalTags | _Optional_. An array of strings allowing to specify additional tags to apply to the image. |
-| imageName      | **_Required_** The name of the image to release.                                           |
+| Option         | Description                                                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| additionalTags | _Optional_. An array of strings allowing to specify additional tags to apply to the image.                                                  |
+| imageName      | **_Required_** The name of the image to release.                                                                                            |
 | registryUrl    | _Optional_. The hostname and port used by the the registry in format `hostname[:port]`. Omit the port if the registry uses the default port |
-| repositoryName | _Optional_. The name of the repository in the registry, e.g. username on docker hub        | 
+| repositoryName | _Optional_. The name of the repository in the registry, e.g. username on docker hub                                                         |
 
 ### Usage
 
 full configuration:
-``` json
+
+```json
 {
   "verifyConfig": ["@iteratec/semantic-release-docker"],
   "prepare": {
@@ -65,10 +66,12 @@ full configuration:
   }
 }
 ```
+
 results in `my-private-registry:5678/my-repository/my-image` with tags `test`, `demo` and the `<semver>` determined by `semantic-release`.
 
 minimum configuration:
-``` json
+
+```json
 {
   "verifyConfig": ["@iteratec/semantic-release-docker"],
   "prepare": {
@@ -80,4 +83,5 @@ minimum configuration:
   }
 }
 ```
+
 results in `my-image:<semver>`
