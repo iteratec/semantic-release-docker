@@ -8,21 +8,10 @@ import { DockerPluginConfig } from '../dockerPluginConfig';
 
 export var prepared = false;
 
-let docker: Dockerode;
-
-export function initDocker(stub?: any) {
-  if (!docker) {
-    if (stub) {
-      docker = stub;
-    } else {
-      docker = new Dockerode();
-    }
-  }
-}
-
 export async function prepare(
   pluginConfig: SemanticReleaseConfig,
   context: SemanticReleaseContext,
+  docker?: Dockerode,
 ): Promise<string[]> {
   const preparePlugin = context.options.prepare!.find(
     (p) => p.path === '@iteratec/semantic-release-docker',
@@ -30,7 +19,9 @@ export async function prepare(
   if (!preparePlugin.imageName) {
     throw new Error('\'imageName\' is not set in plugin configuration');
   }
-  initDocker();
+  if (!docker) {
+    docker = new Dockerode();
+  }
   const image = docker.getImage(preparePlugin.imageName);
   let tags = [context.nextRelease!.version!];
   if (preparePlugin.additionalTags && preparePlugin.additionalTags.length > 0) {
