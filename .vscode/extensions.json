@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "maty.vscode-mocha-sidebar",
+    "ms-vscode.vscode-typescript-tslint-plugin",
+    "esbenp.prettier-vscode",
+    "editorconfig.editorconfig",
+    "eamodio.gitlens",
+    "eg2.vscode-npm-script"
+  ]
+}

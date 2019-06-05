@@ -2,9 +2,12 @@
 !.vscode/launch.json
 !.vscode/tasks.json
 !.vscode/settings.json
+!.vscode/extensions.json
 
 node_modules
 dist
+.nyc_output
+coverage
 
 *.log
 

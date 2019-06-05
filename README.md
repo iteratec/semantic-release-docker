@@ -1,6 +1,6 @@
 # @iteratec/semantic-release-docker
 
-[![Build Status](https://dev.azure.com/iteratec/semantic-release-docker/_apis/build/status/iteratec.semantic-release-docker?branchName=master)](https://dev.azure.com/iteratec/semantic-release-docker/_build/latest?definitionId=2&branchName=master)
+[![Build Status](https://dev.azure.com/iteratec-oss-bdd/semantic-release-docker/_apis/build/status/iteratec.semantic-release-docker?branchName=master)](https://dev.azure.com/iteratec-oss-bdd/semantic-release-docker/_build/latest?definitionId=2&branchName=master)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 [![latest npm package version](https://img.shields.io/npm/v/@iteratec/semantic-release-docker/latest.svg)](https://www.npmjs.com/package/@iteratec/semantic-release-docker)
 [![MIT license](https://img.shields.io/npm/l/@iteratec/semantic-release-docker.svg)](https://www.npmjs.com/package/@iteratec/semantic-release-docker)
