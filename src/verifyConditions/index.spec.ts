@@ -3,7 +3,7 @@ import chaiAsPromised from 'chai-as-promised';
 import Dockerode from 'dockerode';
 import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
 import { createStubInstance, SinonStubbedInstance } from 'sinon';
-import { DockerPluginConfig } from '../models';
+import { Authentication, DockerPluginConfig } from '../models';
 import { verifyConditions } from './index';
 
 describe('@iteratec/semantic-release-docker', function() {
@@ -172,6 +172,41 @@ describe('@iteratec/semantic-release-docker', function() {
       return expect(
         verifyConditions(config, context, (dockerStub as unknown) as Dockerode),
       ).to.not.eventually.be.rejectedWith(`Image with name '${imageName}' does not exist on this machine.`);
+    });
+
+    it('should use the registry from the config', async function() {
+      const expected = {
+        password: 'password',
+        serveraddress: 'my_private_registry',
+        username: 'username',
+      } as Authentication;
+      process.env.DOCKER_REGISTRY_USER = expected.username;
+      process.env.DOCKER_REGISTRY_PASSWORD = expected.password;
+      (context.options.prepare![0] as DockerPluginConfig).registryUrl = expected.serveraddress;
+      await verifyConditions(config, context, (dockerStub as unknown) as Dockerode);
+      // tslint:disable-next-line: no-unused-expression
+      expect(dockerStub.checkAuth.calledOnce).to.be.true;
+      expect(dockerStub.checkAuth.firstCall.args[0]).to.deep.equal(expected);
+    });
+
+    it('should prefer the registry from the environment variable over the one from the config', async function() {
+      const expected = {
+        password: 'topsecret',
+        serveraddress: 'registry_from_env',
+        username: 'me',
+      } as Authentication;
+      process.env.DOCKER_REGISTRY_USER = expected.username;
+      process.env.DOCKER_REGISTRY_PASSWORD = expected.password;
+      process.env.DOCKER_REGISTRY_URL = expected.serveraddress;
+      (context.options.prepare![0] as DockerPluginConfig).registryUrl = 'registry_from_config';
+      await verifyConditions(config, context, (dockerStub as unknown) as Dockerode);
+      // tslint:disable-next-line: no-unused-expression
+      expect(dockerStub.checkAuth.calledOnce).to.be.true;
+      expect(dockerStub.checkAuth.firstCall.args[0]).to.deep.equal(expected);
+    });
+
+    afterEach(function() {
+      dockerStub.checkAuth.resetHistory();
     });
   });
 });
