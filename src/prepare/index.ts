@@ -1,5 +1,4 @@
 import Dockerode from 'dockerode';
-
 import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
 import { DockerPluginConfig } from '../models';
 import { pluginSettings } from '../plugin-settings';
@@ -8,49 +7,53 @@ import { verified, verifyConditions } from '../verifyConditions';
 
 export var prepared = false;
 
-export async function prepare(pluginConfig: SemanticReleaseConfig, context: SemanticReleaseContext): Promise<any[]> {
+export async function prepare(
+  pluginConfig: SemanticReleaseConfig,
+  context: SemanticReleaseContext,
+  dockerode?: Dockerode,
+): Promise<any[]> {
   if (!verified) {
     await verifyConditions(pluginConfig, context).then(
       () => {},
-      reject => {
+      (reject) => {
         return Promise.reject(reject);
-      }
+      },
     );
   }
 
-  const preparePlugins = context.options.prepare!.filter(p => p.path === pluginSettings.path) as DockerPluginConfig[];
+  const preparePlugins = context.options.prepare!.filter((p) => p.path === pluginSettings.path) as DockerPluginConfig[];
 
   return Promise.all(
-    preparePlugins.map(preparePlugin => {
-      const docker = new Dockerode();
+    preparePlugins.map((preparePlugin) => {
+      const docker = dockerode ? dockerode : new Dockerode();
       const image = docker.getImage(preparePlugin.imageName);
       const tags = getImageTagsFromConfig(preparePlugin, context);
       return Promise.all(
-        tags.map(imagetag => {
+        tags.map((imagetag) => {
           return image.tag({
             repo: constructImageName(preparePlugin),
-            tag: imagetag
+            tag: imagetag,
           });
-        })
+        }),
       )
-        .then(data => {
+        .then((data) => {
           if (!prepared) {
             prepared = true;
           }
-          return data.map(result => result.name);
+          return data.map((result) => result.name);
         })
-        .catch(error => {
+        .catch((error) => {
           throw new Error(error);
         });
-    })
+    }),
   )
-    .then(data => {
+    .then((data) => {
       if (!prepared) {
         prepared = true;
       }
-      return data.map(result => result);
+      return data.map((result) => result);
     })
-    .catch(error => {
+    .catch((error) => {
       throw new Error(error);
     });
 }
