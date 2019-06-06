@@ -5,11 +5,11 @@ jobs:
       demands: npm
     steps:
       - task: NodeTool@0
-        displayName: "Use Node 10"
+        displayName: 'Use Node 10'
         inputs:
           versionSpec: 10.x
       - task: Npm@1
-        displayName: "Install dependencies"
+        displayName: 'Install dependencies'
         inputs:
           verbose: false
       - task: Npm@1
@@ -17,6 +17,11 @@ jobs:
         inputs:
           command: custom
           customCommand: run build
+      - task: Npm@1
+        displayName: End2End Test
+        inputs:
+          command: custom
+          customCommand: run e2e
       - task: Npm@1
         displayName: Test
         inputs:
