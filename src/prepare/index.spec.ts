@@ -5,7 +5,6 @@ import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release'
 import { createStubInstance, mock, stub } from 'sinon';
 import { DockerPluginConfig } from '../models';
 import { constructImageName } from '../shared-logic';
-import { buildImage } from '../test/test-helpers';
 import { setVerified } from '../verifyConditions';
 import { prepare } from './index';
 
@@ -27,12 +26,6 @@ describe('@iteratec/semantic-release-docker', function() {
 
       process.env.DOCKER_REGISTRY_USER = 'username';
       process.env.DOCKER_REGISTRY_PASSWORD = 'password';
-    });
-
-    beforeEach(async function() {
-      this.timeout(20000);
-      await buildImage(testImage1);
-      await buildImage(testImage2);
     });
 
     it('should tag image with next version', async function() {

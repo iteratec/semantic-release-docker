@@ -1,7 +1,6 @@
-import Docker from 'dockerode';
+import Dockerode from 'dockerode';
 import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
-import { Credentials, DockerPluginConfig } from '../models';
-import { Authentication } from '../models';
+import { Authentication, Credentials, DockerPluginConfig } from '../models';
 import { pluginSettings } from '../plugin-settings';
 import { getCredentials, getRegistryUrlFromConfig } from '../shared-logic';
 
@@ -20,7 +19,8 @@ export function setVerified() {
  */
 export async function verifyConditions(
   pluginConfig: SemanticReleaseConfig,
-  context: SemanticReleaseContext
+  context: SemanticReleaseContext,
+  dockerode?: Dockerode,
 ): Promise<any> {
   let cred: Credentials;
 
@@ -32,21 +32,21 @@ export async function verifyConditions(
   }
 
   // Check if plugin is configured in prepare step
-  if (!context.options.prepare || !context.options.prepare!.find(p => p.path === pluginSettings.path)) {
-    throw new Error("'prepare' is not configured");
+  if (!context.options.prepare || !context.options.prepare!.find((p) => p.path === pluginSettings.path)) {
+    throw new Error('\'prepare\' is not configured');
   }
 
-  const preparePlugins = context.options.prepare!.filter(p => p.path === pluginSettings.path) as DockerPluginConfig[];
+  const preparePlugins = context.options.prepare!.filter((p) => p.path === pluginSettings.path) as DockerPluginConfig[];
 
   for (let i = 0; i < preparePlugins.length; i++) {
     const preparePlugin = preparePlugins[i];
 
     // Check if imagename is set
     if (preparePlugin.imageName == null || preparePlugin.imageName.length === 0) {
-      throw new Error("'imageName' is not set in plugin configuration");
+      throw new Error('\'imageName\' is not set in plugin configuration');
     }
 
-    const docker = new Docker();
+    const docker = dockerode ? dockerode : new Dockerode();
 
     // Check if image exists on machine
     const imagelist = await docker.listImages({ filters: { reference: [preparePlugin.imageName] } });
@@ -57,17 +57,17 @@ export async function verifyConditions(
     // Check Authentication
     const auth: Authentication = {
       ...cred,
-      serveraddress: getRegistryUrlFromConfig(preparePlugin)
+      serveraddress: getRegistryUrlFromConfig(preparePlugin),
     };
 
     return docker
       .checkAuth(auth)
-      .then(data => {
+      .then((data) => {
         if (!verified) {
           verified = true;
         }
       })
-      .catch(error => {
+      .catch((error) => {
         throw new Error(error);
       });
   }
