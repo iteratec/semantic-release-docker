@@ -7,26 +7,32 @@
 
 A [semantic-release](https://github.com/semantic-release/semantic-release) plugin to use semantic versioning for docker images.
 
-## verifyConditions
+## Supported Steps
+
+### verifyConditions
 
 verifies that environment variables for authentication via username and password are set.
 It uses a registry server provided via config or environment variable (preferred) or defaults to docker hub if none is given.
 It also verifies that the credentials are correct by logging in to the given registry.
 
-## prepare
+### prepare
 
 tags the specified image with the version number determined by semantic-release and additional tags provided in the configuration.
 In addition it supports specifying a complete image name (CIN) via configuration settings according to the canonical format specified by docker:
 
 `[registryhostname[:port]/][username/]imagename[:tag]`
 
-## publish
+### publish
 
 pushes the tagged images to the registry.
 
+## Installation
+
+Run `npm i --save-dev @iteratec/semantic-release-docker` to install this semantic-release plugin.
+
 ## Configuration
 
-### docker registry authentication
+### Docker registry authentication
 
 The `docker registry` authentication is **required** and can be set via environment variables.
 
@@ -47,7 +53,7 @@ The `docker registry` authentication is **required** and can be set via environm
 | registryUrl    | _Optional_. The hostname and port used by the the registry in format `hostname[:port]`. Omit the port if the registry uses the default port |
 | repositoryName | _Optional_. The name of the repository in the registry, e.g. username on docker hub                                                         |
 
-### Usage
+## Usage
 
 full configuration:
 
