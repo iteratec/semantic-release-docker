@@ -101,7 +101,7 @@ describe('@iteratec/semantic-release-docker', function() {
       expect(dockerStub.checkAuth.firstCall.args[0]).to.deep.equal(expected);
     });
 
-    it('should default to docker hub if no registry is specified', async function() {
+    it('should let docker decide which registry to use if none is specified', async function() {
       const expected = {
         password: 'topsecret',
         serveraddress: '',
