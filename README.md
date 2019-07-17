@@ -7,11 +7,11 @@
 
 A [semantic-release](https://github.com/semantic-release/semantic-release) plugin to use semantic versioning for docker images.
 
+## Installation
+
+Run `npm i --save-dev @iteratec/semantic-release-docker` to install this semantic-release plugin.
+
 ## Configuration
-
-### Installation
-
-`npm i --save @iteratec/semantic-release-docker`
 
 ### Docker registry authentication
 
@@ -101,58 +101,58 @@ Pushes the tagged images to the registry.
 
 1. Create a develop.ts file in the root of this Git-Repository and copy this:
 
-```typescript
-import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
-import { prepare, publish, verifyConditions } from './src';
-import { DockerPluginConfig } from './src/models';
+    ```typescript
+    import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
+    import { prepare, publish, verifyConditions } from './src';
+    import { DockerPluginConfig } from './src/models';
 
-process.env.DOCKER_REGISTRY_USER = '<Your Docker Registry User>';
-process.env.DOCKER_REGISTRY_PASSWORD = '<Your Docker Registry Password>';
+    process.env.DOCKER_REGISTRY_USER = '<Your Docker Registry User>';
+    process.env.DOCKER_REGISTRY_PASSWORD = '<Your Docker Registry Password>';
 
-const config: SemanticReleaseConfig = {
-  branch: '',
-  noCi: true,
-  repositoryUrl: '',
-  tagFormat: ''
-};
-const context: SemanticReleaseContext = {
-  logger: {
-    // tslint:disable-next-line:no-empty
-    log: (message: string) => {}
-  },
-  options: {
-    branch: '',
-    noCi: true,
-    prepare: [
-      {
-        additionalTags: ['latest'],
-        imageName: 'testimage',
-        repositoryName: '<your test repository>',
-        path: '@iteratec/semantic-release-docker'
-      } as DockerPluginConfig,
-      {
-        additionalTags: ['latest'],
-        imageName: 'testimage1',
-        repositoryName: '<your test repository>',
-        path: '@iteratec/semantic-release-docker'
-      } as DockerPluginConfig
-    ],
-    repositoryUrl: '',
-    tagFormat: ''
-  },
-  nextRelease: {
-    version: '1.0.3',
-    gitHead: '45jh345g',
-    gitTag: 'v1.0.3',
-    notes: 'Nothing special'
-  }
-};
-context.logger.log = (string: string) => {
-  console.log(string);
-};
-verifyConditions(config, context);
-prepare(config, context);
-publish(config, context);
-```
+    const config: SemanticReleaseConfig = {
+      branch: '',
+      noCi: true,
+      repositoryUrl: '',
+      tagFormat: ''
+    };
+    const context: SemanticReleaseContext = {
+      logger: {
+        // tslint:disable-next-line:no-empty
+        log: (message: string) => {}
+      },
+      options: {
+        branch: '',
+        noCi: true,
+        prepare: [
+          {
+            additionalTags: ['latest'],
+            imageName: 'testimage',
+            repositoryName: '<your test repository>',
+            path: '@iteratec/semantic-release-docker'
+          } as DockerPluginConfig,
+          {
+            additionalTags: ['latest'],
+            imageName: 'testimage1',
+            repositoryName: '<your test repository>',
+            path: '@iteratec/semantic-release-docker'
+          } as DockerPluginConfig
+        ],
+        repositoryUrl: '',
+        tagFormat: ''
+      },
+      nextRelease: {
+        version: '1.0.3',
+        gitHead: '45jh345g',
+        gitTag: 'v1.0.3',
+        notes: 'Nothing special'
+      }
+    };
+    context.logger.log = (string: string) => {
+      console.log(string);
+    };
+    verifyConditions(config, context);
+    prepare(config, context);
+    publish(config, context);
+    ```
 
-2.  Simply run the "Debug" VS Code Task
+2. Simply run the "Debug" VS Code Task

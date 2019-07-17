@@ -205,6 +205,24 @@ describe('@iteratec/semantic-release-docker', function() {
       expect(dockerStub.checkAuth.firstCall.args[0]).to.deep.equal(expected);
     });
 
+    it('should default to empty string if no registry is specified', async function() {
+      const expected = {
+        password: 'topsecret',
+        serveraddress: '',
+        username: 'me',
+      } as Authentication;
+      process.env.DOCKER_REGISTRY_USER = expected.username;
+      process.env.DOCKER_REGISTRY_PASSWORD = expected.password;
+      delete process.env.DOCKER_REGISTRY_URL;
+      (context.options.prepare![0] as DockerPluginConfig).registryUrl = '';
+      (context.options.prepare![0] as DockerPluginConfig).imageName = 'test';
+
+      await verifyConditions(config, context, (dockerStub as unknown) as Dockerode);
+      // tslint:disable-next-line: no-unused-expression
+      expect(dockerStub.checkAuth.calledOnce).to.be.true;
+      expect(dockerStub.checkAuth.firstCall.args[0]).to.deep.equal(expected);
+    });
+
     afterEach(function() {
       dockerStub.checkAuth.resetHistory();
     });
