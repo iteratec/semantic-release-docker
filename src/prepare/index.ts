@@ -1,56 +1,46 @@
 import Dockerode from 'dockerode';
-
-import {
-  SemanticReleaseConfig,
-  SemanticReleaseContext,
-} from 'semantic-release';
-import { DockerPluginConfig } from '../dockerPluginConfig';
+import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
+import { DockerPluginConfig } from '../models';
+import { pluginSettings } from '../plugin-settings';
+import { constructImageName, getImageTagsFromConfig } from '../shared-logic';
+import { verified, verifyConditions } from '../verifyConditions';
 
 export var prepared = false;
 
 export async function prepare(
   pluginConfig: SemanticReleaseConfig,
   context: SemanticReleaseContext,
-  docker?: Dockerode,
-): Promise<string[]> {
-  const preparePlugin = context.options.prepare!.find(
-    (p) => p.path === '@iteratec/semantic-release-docker',
-  ) as DockerPluginConfig;
-  if (!preparePlugin.imageName) {
-    throw new Error('\'imageName\' is not set in plugin configuration');
+  dockerode?: Dockerode,
+): Promise<any[]> {
+  if (!verified) {
+    await verifyConditions(pluginConfig, context).then(
+      () => {},
+      (reject) => {
+        return Promise.reject(reject);
+      },
+    );
   }
-  if (!docker) {
-    docker = new Dockerode();
-  }
-  const image = docker.getImage(preparePlugin.imageName);
-  let tags = [context.nextRelease!.version!];
-  if (preparePlugin.additionalTags && preparePlugin.additionalTags.length > 0) {
-    tags = tags.concat(preparePlugin.additionalTags);
-  }
+
+  const preparePlugins = context.options.prepare!.filter((p) => p.path === pluginSettings.path) as DockerPluginConfig[];
+  const docker = dockerode ? dockerode : new Dockerode();
+
   return Promise.all(
-    tags.map((imagetag) => {
-      return image.tag({
-        repo:
-          `${
-            preparePlugin.registryUrl ? `${preparePlugin.registryUrl}/` : ''
-          }` +
-          `${
-            preparePlugin.repositoryName
-              ? `${preparePlugin.repositoryName}/`
-              : ''
-          }` +
-          `${preparePlugin.imageName}`,
-        tag: imagetag,
+    preparePlugins.map((preparePlugin) => {
+      const image = docker.getImage(preparePlugin.imageName);
+      const tags = getImageTagsFromConfig(preparePlugin, context);
+      return Promise.all(
+        tags.map((imagetag) => {
+          return image.tag({
+            repo: constructImageName(preparePlugin),
+            tag: imagetag,
+          });
+        }),
+      ).then((data) => {
+        return data.map((result) => result.name);
       });
     }),
-  )
-    .then((data) => {
-      if (!prepared) {
-        prepared = true;
-      }
-      return data.map((result) => result.name);
-    })
-    .catch((error) => {
-      throw new Error(error);
-    });
+  ).then((data) => {
+    prepared = true;
+    return data.map((result) => result);
+  });
 }

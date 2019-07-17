@@ -1,61 +1,60 @@
 import Dockerode from 'dockerode';
-import {
-  SemanticReleaseConfig,
-  SemanticReleaseContext,
-} from 'semantic-release';
-
-import { DockerPluginConfig } from '../dockerPluginConfig';
-import { Auth } from '../model/auth';
+import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
+import { Authentication, DockerPluginConfig } from '../models';
+import { pluginSettings } from '../plugin-settings';
+import { getCredentials, getRegistryUrlFromConfig } from '../shared-logic';
 
 export var verified = false;
+/**
+ * Just for test purposes.
+ * @param val
+ */
+export function setVerified() {
+  verified = true;
+}
 
+/**
+ * First Step
+ * Verify all conditions in order to proceed with the release
+ */
 export async function verifyConditions(
   pluginConfig: SemanticReleaseConfig,
   context: SemanticReleaseContext,
-  docker?: Dockerode,
-) {
-  if (!process.env.DOCKER_REGISTRY_USER) {
-    throw new Error(
-      'Environment variable DOCKER_REGISTRY_USER must be set in order to login to the registry.',
-    );
-  }
-  if (!process.env.DOCKER_REGISTRY_PASSWORD) {
-    throw new Error(
-      'Environment variable DOCKER_REGISTRY_PASSWORD must be set in order to login to the registry.',
-    );
-  }
-  let preparePlugin: DockerPluginConfig;
-  if (
-    !context.options.prepare ||
-    !context.options.prepare!.find(
-      (p) => p.path === '@iteratec/semantic-release-docker',
-    )
-  ) {
+  dockerode?: Dockerode,
+): Promise<any> {
+  // Check if Username and Password are set if not reject Promise with Error Message
+  const cred = getCredentials();
+
+  // Check if plugin is configured in prepare step
+  if (!context.options.prepare || !context.options.prepare!.find((p) => p.path === pluginSettings.path)) {
     throw new Error('\'prepare\' is not configured');
   }
-  preparePlugin = context.options.prepare.find(
-    (p) => p.path === '@iteratec/semantic-release-docker',
-  ) as DockerPluginConfig;
-  let registryUrl: string;
-  if (process.env.DOCKER_REGISTRY_URL || preparePlugin.registryUrl) {
-    registryUrl = process.env.DOCKER_REGISTRY_URL
-      ? process.env.DOCKER_REGISTRY_URL
-      : preparePlugin.registryUrl!;
-  } else {
-    registryUrl = '';
-  }
 
-  if (!docker) {
-    docker = new Dockerode();
-  }
-  const auth = {
-    password: process.env.DOCKER_REGISTRY_PASSWORD,
-    serveraddress: registryUrl,
-    username: process.env.DOCKER_REGISTRY_USER,
-  } as Auth;
-  return docker.checkAuth(auth).then((result) => {
-    if (!verified) {
-      verified = true;
-    }
-  });
+  const preparePlugins = context.options.prepare!.filter((p) => p.path === pluginSettings.path) as DockerPluginConfig[];
+  const docker = dockerode ? dockerode : new Dockerode();
+
+  return Promise.all(
+    preparePlugins.map(async (preparePlugin) => {
+      // Check if imagename is set
+      if (preparePlugin.imageName == null || preparePlugin.imageName.length === 0) {
+        throw new Error('\'imageName\' is not set in plugin configuration');
+      }
+
+      // Check if image exists on machine
+      const imagelist = await docker.listImages({ filters: { reference: [preparePlugin.imageName] } });
+      if (imagelist.length === 0) {
+        throw new Error(`Image with name '${preparePlugin.imageName}' does not exist on this machine.`);
+      }
+
+      // Check Authentication
+      const auth: Authentication = {
+        ...cred,
+        serveraddress: getRegistryUrlFromConfig(preparePlugin),
+      };
+
+      return docker.checkAuth(auth).then((data) => {
+        verified = true;
+      });
+    }),
+  );
 }

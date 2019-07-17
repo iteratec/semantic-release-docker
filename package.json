@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "postbuild": "cpx package.json dist/ && cpx package-lock.json dist/",
+    "postbuild": "cpx package.json dist/ && cpx package-lock.json dist/ && cpx README.md dist/",
     "commit": "git-cz",
     "test": "mocha -r chai -r chai-as-promised -r ts-node/register src/**/*.spec.ts",
+    "e2e": "mocha -r chai -r chai-as-promised -r ts-node/register src/**/*.e2e.ts",
     "release": "semantic-release"
   },
   "keywords": [
