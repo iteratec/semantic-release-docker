@@ -14,9 +14,12 @@
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
       "args": [
         "src/**/*.spec.ts",
-        "-r", "chai",
-        "-r", "chai-as-promised",
-        "-r", "ts-node/register"
+        "-r",
+        "chai",
+        "-r",
+        "chai-as-promised",
+        "-r",
+        "ts-node/register"
       ],
       "sourceMaps": true
     },
@@ -28,6 +31,22 @@
       "outFiles": [
         "${workspaceFolder}/**/*.js"
       ]
+    },
+    {
+      "name": "Debug",
+      "type": "node",
+      "request": "launch",
+      "args": [
+        "${workspaceRoot}/develop.ts"
+      ],
+      "runtimeArgs": [
+        "--nolazy",
+        "-r",
+        "ts-node/register"
+      ],
+      "sourceMaps": true,
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector"
     }
   ]
 }
