@@ -65,9 +65,6 @@ export async function publish(pluginConfig: SemanticReleaseConfig, context: Sema
           return {
             completeImageName: tags.map((tag: string) => `${imageName}:${tag}`),
           } as PublishedRelease;
-        })
-        .catch((error) => {
-          throw new Error(error);
         });
     }),
   ).then((publishedImages) => {

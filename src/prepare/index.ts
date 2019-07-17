@@ -35,20 +35,12 @@ export async function prepare(
             tag: imagetag,
           });
         }),
-      )
-        .then((data) => {
-          return data.map((result) => result.name);
-        })
-        .catch((error) => {
-          throw new Error(error);
-        });
+      ).then((data) => {
+        return data.map((result) => result.name);
+      });
     }),
-  )
-    .then((data) => {
-      prepared = true;
-      return data.map((result) => result);
-    })
-    .catch((error) => {
-      throw new Error(error);
-    });
+  ).then((data) => {
+    prepared = true;
+    return data.map((result) => result);
+  });
 }

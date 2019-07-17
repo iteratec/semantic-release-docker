@@ -1,6 +1,6 @@
 import Dockerode from 'dockerode';
 import { SemanticReleaseConfig, SemanticReleaseContext } from 'semantic-release';
-import { Authentication, Credentials, DockerPluginConfig } from '../models';
+import { Authentication, DockerPluginConfig } from '../models';
 import { pluginSettings } from '../plugin-settings';
 import { getCredentials, getRegistryUrlFromConfig } from '../shared-logic';
 
@@ -22,14 +22,8 @@ export async function verifyConditions(
   context: SemanticReleaseContext,
   dockerode?: Dockerode,
 ): Promise<any> {
-  let cred: Credentials;
-
   // Check if Username and Password are set if not reject Promise with Error Message
-  try {
-    cred = getCredentials();
-  } catch (err) {
-    return Promise.reject(err.message);
-  }
+  const cred = getCredentials();
 
   // Check if plugin is configured in prepare step
   if (!context.options.prepare || !context.options.prepare!.find((p) => p.path === pluginSettings.path)) {
@@ -59,14 +53,9 @@ export async function verifyConditions(
         serveraddress: getRegistryUrlFromConfig(preparePlugin),
       };
 
-      return docker
-        .checkAuth(auth)
-        .then((data) => {
-          verified = true;
-        })
-        .catch((error) => {
-          throw new Error(error);
-        });
+      return docker.checkAuth(auth).then((data) => {
+        verified = true;
+      });
     }),
   );
 }
