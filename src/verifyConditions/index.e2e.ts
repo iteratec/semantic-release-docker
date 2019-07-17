@@ -15,24 +15,6 @@ describe('@iteratec/semantic-release-docker', function() {
       repositoryUrl: '',
       tagFormat: '',
     };
-    const context: SemanticReleaseContext = {
-      logger: {
-        // tslint:disable-next-line:no-empty
-        log: (message: string) => {},
-      },
-      options: {
-        branch: '',
-        noCi: true,
-        prepare: [
-          {
-            imageName,
-            path: '@iteratec/semantic-release-docker',
-          } as DockerPluginConfig,
-        ],
-        repositoryUrl: '',
-        tagFormat: '',
-      },
-    };
 
     before(function() {
       use(chaiAsPromised);
@@ -40,7 +22,9 @@ describe('@iteratec/semantic-release-docker', function() {
 
     it('should throw if image with imagename does not exist', async function() {
       const docker = new Docker();
-      await docker.getImage(imageName).remove();
+      try {
+        await docker.getImage(imageName).remove();
+      } catch (e) {}
 
       const context = {
         // tslint:disable-next-line:no-empty
