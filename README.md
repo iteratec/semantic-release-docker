@@ -17,15 +17,13 @@ Run `npm i --save-dev @iteratec/semantic-release-docker` to install this semanti
 
 The `docker registry` authentication is **required** and can be set via environment variables.
 
-### Environment variables
-
 | Variable                 | Description                                                                               |
 | ------------------------ | ----------------------------------------------------------------------------------------- |
 | DOCKER_REGISTRY_URL      | The hostname and port used by the desired docker registry. Leave blank to use docker hub. |
 | DOCKER_REGISTRY_USER     | The user name to authenticate with at the registry.                                       |
 | DOCKER_REGISTRY_PASSWORD | The password used for authentication at the registry.                                     |
 
-### Usage
+### Plugin Configuration
 
 #### Full configuration
 
@@ -155,4 +153,4 @@ Pushes the tagged images to the registry.
     publish(config, context);
     ```
 
-2. Simply run the "Debug" VS Code Task
+2. Simply run the "Debug" configuration in the Debug VS Code Tab.
