@@ -38,37 +38,35 @@ export async function verifyConditions(
 
   const preparePlugins = context.options.prepare!.filter((p) => p.path === pluginSettings.path) as DockerPluginConfig[];
 
-  for (let i = 0; i < preparePlugins.length; i++) {
-    const preparePlugin = preparePlugins[i];
+  return Promise.all(
+    preparePlugins.map(async (preparePlugin) => {
+      // Check if imagename is set
+      if (preparePlugin.imageName == null || preparePlugin.imageName.length === 0) {
+        throw new Error('\'imageName\' is not set in plugin configuration');
+      }
 
-    // Check if imagename is set
-    if (preparePlugin.imageName == null || preparePlugin.imageName.length === 0) {
-      throw new Error('\'imageName\' is not set in plugin configuration');
-    }
+      const docker = dockerode ? dockerode : new Dockerode();
 
-    const docker = dockerode ? dockerode : new Dockerode();
+      // Check if image exists on machine
+      const imagelist = await docker.listImages({ filters: { reference: [preparePlugin.imageName] } });
+      if (imagelist.length === 0) {
+        throw new Error(`Image with name '${preparePlugin.imageName}' does not exist on this machine.`);
+      }
 
-    // Check if image exists on machine
-    const imagelist = await docker.listImages({ filters: { reference: [preparePlugin.imageName] } });
-    if (imagelist.length === 0) {
-      throw new Error(`Image with name '${preparePlugin.imageName}' does not exist on this machine.`);
-    }
+      // Check Authentication
+      const auth: Authentication = {
+        ...cred,
+        serveraddress: getRegistryUrlFromConfig(preparePlugin),
+      };
 
-    // Check Authentication
-    const auth: Authentication = {
-      ...cred,
-      serveraddress: getRegistryUrlFromConfig(preparePlugin),
-    };
-
-    return docker
-      .checkAuth(auth)
-      .then((data) => {
-        if (!verified) {
+      return docker
+        .checkAuth(auth)
+        .then((data) => {
           verified = true;
-        }
-      })
-      .catch((error) => {
-        throw new Error(error);
-      });
-  }
+        })
+        .catch((error) => {
+          throw new Error(error);
+        });
+    }),
+  );
 }
