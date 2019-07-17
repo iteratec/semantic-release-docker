@@ -37,9 +37,6 @@ export async function prepare(
         }),
       )
         .then((data) => {
-          if (!prepared) {
-            prepared = true;
-          }
           return data.map((result) => result.name);
         })
         .catch((error) => {
@@ -48,9 +45,7 @@ export async function prepare(
     }),
   )
     .then((data) => {
-      if (!prepared) {
-        prepared = true;
-      }
+      prepared = true;
       return data.map((result) => result);
     })
     .catch((error) => {
