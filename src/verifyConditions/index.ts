@@ -31,6 +31,7 @@ export async function verifyConditions(
   }
 
   const preparePlugins = context.options.prepare!.filter((p) => p.path === pluginSettings.path) as DockerPluginConfig[];
+  const docker = dockerode ? dockerode : new Dockerode();
 
   return Promise.all(
     preparePlugins.map(async (preparePlugin) => {
@@ -38,8 +39,6 @@ export async function verifyConditions(
       if (preparePlugin.imageName == null || preparePlugin.imageName.length === 0) {
         throw new Error('\'imageName\' is not set in plugin configuration');
       }
-
-      const docker = dockerode ? dockerode : new Dockerode();
 
       // Check if image exists on machine
       const imagelist = await docker.listImages({ filters: { reference: [preparePlugin.imageName] } });

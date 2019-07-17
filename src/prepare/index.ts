@@ -22,10 +22,10 @@ export async function prepare(
   }
 
   const preparePlugins = context.options.prepare!.filter((p) => p.path === pluginSettings.path) as DockerPluginConfig[];
+  const docker = dockerode ? dockerode : new Dockerode();
 
   return Promise.all(
     preparePlugins.map((preparePlugin) => {
-      const docker = dockerode ? dockerode : new Dockerode();
       const image = docker.getImage(preparePlugin.imageName);
       const tags = getImageTagsFromConfig(preparePlugin, context);
       return Promise.all(
